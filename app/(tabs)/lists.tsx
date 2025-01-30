@@ -1,8 +1,9 @@
 import React from 'react';
 import { ThemedText } from '@/components/ThemedText';
-import { View, Text, FlatList } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ComponentProps } from 'react';
+import { useRouter } from 'expo-router';
 import styles from '../../styles/lists';
 
 type MaterialCommunityIconName = ComponentProps<typeof MaterialCommunityIcons>['name'];
@@ -16,24 +17,28 @@ interface ListItem {
 }
 
 const data: ListItem[] = [
-  { id: '1', iconName: 'home', iconColor: '#ff5c5c', title: 'Day by day', count: 13 },
-  { id: '2', iconName: 'laptop', iconColor: '#5da6ff', title: 'Study', count: 0 },
-  { id: '3', iconName: 'currency-usd', iconColor: '#ffc107', title: 'Contas', count: 18 },
-  { id: '4', iconName: 'dumbbell', iconColor: '#4caf50', title: 'Saúde', count: 2 },
-  { id: '5', iconName: 'trash-can', iconColor: '#9e9e9e', title: 'Apagados', count: 4 },
+  { id: '1', iconName: 'home', iconColor: '#ff5c5c', title: 'Tarefas semanais', count: 13 },
 ];
 
 const ListScreen: React.FC = () => {
+  const router = useRouter();
+
+  const navigateToTasks = () => {
+    router.push('/screens/taskListScreen'); // Substitua pelo caminho correto da sua página de tarefas
+  };
+
   const renderItem = ({ item }: { item: ListItem }) => (
-    <View style={styles.cardContainer}>
-      <View style={styles.leftSection}>
-        <View style={[styles.iconContainer, { backgroundColor: item.iconColor }]}>
-          <MaterialCommunityIcons name={item.iconName} size={24} color="#fff" />
+    <TouchableOpacity onPress={navigateToTasks}>
+      <View style={styles.cardContainer}>
+        <View style={styles.leftSection}>
+          <View style={[styles.iconContainer, { backgroundColor: item.iconColor }]}>
+            <MaterialCommunityIcons name={item.iconName} size={24} color="#fff" />
+          </View>
+          <Text style={styles.title}>{item.title}</Text>
         </View>
-        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.count}>{item.count}</Text>
       </View>
-      <Text style={styles.count}>{item.count}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -54,6 +59,5 @@ const ListScreen: React.FC = () => {
     </View>
   );
 };
-
 
 export default ListScreen;
