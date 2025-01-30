@@ -13,18 +13,17 @@ interface ListItem {
   iconName: MaterialCommunityIconName;
   iconColor: string;
   title: string;
-  count: number;
 }
 
 const data: ListItem[] = [
-  { id: '1', iconName: 'home', iconColor: '#ff5c5c', title: 'Tarefas semanais', count: 13 },
+  { id: '1', iconName: 'home', iconColor: '#ff5c5c', title: 'Tarefas semanais' },
 ];
 
 const ListScreen: React.FC = () => {
   const router = useRouter();
 
   const navigateToTasks = () => {
-    router.push('/screens/taskListScreen'); // Substitua pelo caminho correto da sua página de tarefas
+    router.push('/screens/taskListScreen');
   };
 
   const renderItem = ({ item }: { item: ListItem }) => (
@@ -36,7 +35,6 @@ const ListScreen: React.FC = () => {
           </View>
           <Text style={styles.title}>{item.title}</Text>
         </View>
-        <Text style={styles.count}>{item.count}</Text>
       </View>
     </TouchableOpacity>
   );
