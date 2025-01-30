@@ -27,10 +27,8 @@ export default function TaskListScreen() {
     reorderTasks,
   } = useTaskContext();
 
-  // Estado para controlar o "banner" de desfazer
   const [recentlyDeletedTask, setRecentlyDeletedTask] = useState<Task | null>(null);
   const [undoTimer, setUndoTimer] = useState<NodeJS.Timeout | null>(null);
-
   const [newTask, setNewTask] = useState('');
   const [newDueDate, setNewDueDate] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -61,16 +59,17 @@ export default function TaskListScreen() {
         id: Date.now().toString(),
         title: `Tarefa Simulada ${Math.floor(Math.random() * 100)}`,
         dueDate: '01/02/2025',
-        completed: false,
+        completed: false, 
         favorited: false,
         state: 'active',
       };
       addTask(simulatedTask);
-    }, 15000); // A cada 5 minutos
+    }, 15000); // A cada 15 segundos
 
     return () => clearInterval(interval);
   }, []);
 
+  // Formato da data ao adicionar task
   const handleDateChange = (text: string) => {
     let formattedText = text.replace(/\D/g, '');
 
@@ -116,25 +115,18 @@ export default function TaskListScreen() {
     setNewDueDate('');
   };
 
-  /**
-   * Deletar uma task e mostrar o botão de "Desfazer"
-   */
+  
+  // Deletar uma task e mostrar o botão de "Desfazer"
   const handleDeleteTask = (id: string) => {
-    // 1) Achar a task para podermos restaurá-la se o usuário "desfizer"
     const taskToDelete = tasks.find((t) => t.id === id);
     if (!taskToDelete) return;
-
-    // 2) Excluir imediatamente (para sumir da lista)
-    //    e guardar a tarefa em "recentlyDeletedTask"
     deleteTask(id);
     setRecentlyDeletedTask(taskToDelete);
 
-    // 3) Se já existir um timer anterior, limpamos
     if (undoTimer) {
       clearTimeout(undoTimer);
     }
 
-    // 4) Iniciar um timer de 5 segundos para remover o "banner" se não for desfeito
     const timer = setTimeout(() => {
       setRecentlyDeletedTask(null);
     }, 5000);
@@ -142,16 +134,11 @@ export default function TaskListScreen() {
     setUndoTimer(timer);
   };
 
-  /**
-   * Função para desfazer a exclusão
-   */
   const handleUndoDelete = () => {
     if (recentlyDeletedTask) {
-      // Re-adiciona a tarefa que havia sido excluída
       addTask(recentlyDeletedTask);
     }
 
-    // Limpa o estado e o timer
     setRecentlyDeletedTask(null);
     if (undoTimer) {
       clearTimeout(undoTimer);
@@ -197,6 +184,7 @@ export default function TaskListScreen() {
             placeholder="Editar data de vencimento"
             value={editingTaskDueDate}
             onChangeText={setEditingTaskDueDate}
+            keyboardType="numeric"
           />
           <TouchableOpacity onPress={handleEditTask}>
             <Text style={styles.saveButtonText}>Salvar</Text>
@@ -287,6 +275,7 @@ export default function TaskListScreen() {
           placeholderTextColor="#a1a1a1"
           value={newDueDate}
           onChangeText={handleDateChange}
+          keyboardType="numeric"
         />
 
         <TouchableOpacity style={styles.addButton} onPress={handleAddTask}>
@@ -301,7 +290,7 @@ export default function TaskListScreen() {
         onDragEnd={({ data }) => handleReorderTasks(data)}
       />
 
-      {/* Banner de desfazer (somente se existir alguma tarefa excluída recentemente) */}
+      {/* Banner de desfazer */}
       {recentlyDeletedTask && (
         <View style={{ 
           backgroundColor: '#4a90e2', 

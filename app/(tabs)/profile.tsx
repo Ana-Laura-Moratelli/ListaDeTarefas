@@ -18,7 +18,7 @@ export default function ProfileScreen() {
       </View>
 
       <Text style={styles.nameText}>Ana Laura</Text>
-      <Text style={styles.emailText}>analauramoratelli@gmail.com</Text>
+      <Text style={styles.emailText}>analauramoratelli203@gmail.com</Text>
 
       <View style={styles.inputContainer}>
         <TextInput
