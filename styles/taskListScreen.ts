@@ -63,13 +63,30 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         borderRadius: 8,
         alignItems: 'center',
-        marginTop: 10,
+        
       },
       addButtonText: {
         color: '#ffffff',
         fontSize: 18,
         fontWeight: '600',
       },
+
+      editContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 12,
+        backgroundColor: '#1c1c1e',
+        borderRadius: 8,
+        marginBottom: 8,
+      },
+      saveButtonText: {
+        color: '#4a90e2',
+        fontWeight: 'bold',
+        fontSize: 16,
+        paddingHorizontal: 10,
+      },
+      
 });
 
 export default styles;

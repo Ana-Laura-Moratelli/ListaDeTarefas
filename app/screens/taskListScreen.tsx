@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
-  FlatList,
   View,
   TextInput,
   Text,
@@ -9,29 +8,58 @@ import {
   Platform,
   Alert,
 } from 'react-native';
+import DraggableFlatList, {
+  RenderItemParams,
+} from 'react-native-draggable-flatlist';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTaskContext, Task } from '../../contexts/TaskContext';
 import styles from '../../styles/taskListScreen';
 
-interface Task {
-  id: string;
-  title: string;
-  dueDate: string;
-  completed: boolean;
-  favorited: boolean;
-}
-
 export default function TaskListScreen() {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: 'Testando', dueDate: '30/01/2025', completed: false, favorited: false },
-    { id: '2', title: 'Teste', dueDate: '31/01/2025', completed: false, favorited: false },
-  ]);
+  const { tasks, addTask, updateTask, deleteTask, toggleCompletion, toggleFavorite, reorderTasks } = useTaskContext();
   const [newTask, setNewTask] = useState('');
   const [newDueDate, setNewDueDate] = useState('');
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingTaskTitle, setEditingTaskTitle] = useState('');
+  const [editingTaskDueDate, setEditingTaskDueDate] = useState('');
   const inputRef = useRef<TextInput>(null);
 
-  // Função para formatar automaticamente a data em "dd/mm/aaaa"
+  // Carregar tarefas salvas ao abrir o aplicativo
+  useEffect(() => {
+    const loadTasks = async () => {
+      const savedTasks = await AsyncStorage.getItem('tasks');
+      if (savedTasks) {
+        reorderTasks(JSON.parse(savedTasks));
+      }
+    };
+    loadTasks();
+  }, []);
+
+  // Salvar tarefas no AsyncStorage sempre que forem modificadas
+  useEffect(() => {
+    AsyncStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  // Simular tarefas de outros colaboradores
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const simulatedTask: Task = {
+        id: Date.now().toString(),
+        title: `Tarefa Simulada ${Math.floor(Math.random() * 100)}`,
+        dueDate: '01/02/2025',
+        completed: false,
+        favorited: false,
+        state: 'active',
+      };
+      addTask(simulatedTask);
+    }, 300000); // A cada 5 minutos uma nova task
+
+    return () => clearInterval(interval);
+  }, []);
+
   const handleDateChange = (text: string) => {
-    let formattedText = text.replace(/\D/g, ''); // Remove caracteres não numéricos
+    let formattedText = text.replace(/\D/g, '');
 
     if (formattedText.length >= 5) {
       formattedText = `${formattedText.slice(0, 2)}/${formattedText.slice(2, 4)}/${formattedText.slice(4, 8)}`;
@@ -52,54 +80,90 @@ export default function TaskListScreen() {
       return;
     }
 
-    setTasks((prevTasks) => [
-      ...prevTasks,
-      { id: Date.now().toString(), title: newTask, dueDate: newDueDate, completed: false, favorited: false },
-    ]);
+    addTask({
+      id: Date.now().toString(),
+      title: newTask,
+      dueDate: newDueDate,
+      completed: false,
+      favorited: false,
+      state: 'active',
+    });
+
     setNewTask('');
     setNewDueDate('');
   };
 
-  const toggleTaskCompletion = (id: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task))
-    );
+  const handleEditTask = () => {
+    if (editingTaskId && editingTaskTitle.trim() && editingTaskDueDate.length === 10) {
+      if (updateTask(editingTaskId, editingTaskTitle, editingTaskDueDate)) {
+        setEditingTaskId(null);
+        setEditingTaskTitle('');
+        setEditingTaskDueDate('');
+      }
+    }
   };
 
-  const toggleFavorite = (id: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) => (task.id === id ? { ...task, favorited: !task.favorited } : task))
+  // Ajuste para receber 'drag' do DraggableFlatList
+  const renderTask = ({ item, drag }: RenderItemParams<Task>) => {
+    // Se estiver editando esta tarefa
+    if (editingTaskId === item.id) {
+      return (
+        <View style={styles.editContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Editar título"
+            value={editingTaskTitle}
+            onChangeText={setEditingTaskTitle}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Editar data de vencimento (dd/mm/aaaa)"
+            value={editingTaskDueDate}
+            onChangeText={setEditingTaskDueDate}
+          />
+          <TouchableOpacity onPress={handleEditTask}>
+            <Text style={styles.saveButtonText}>Salvar</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    // Render normal da tarefa
+    return (
+      // onLongPress ativa o drag
+      <TouchableOpacity onLongPress={drag} style={styles.taskContainer}>
+        <TouchableOpacity onPress={() => toggleCompletion(item.id)} style={styles.checkbox}>
+          {item.completed ? (
+            <MaterialCommunityIcons name="checkbox-marked-circle" size={24} color="#4a90e2" />
+          ) : (
+            <MaterialCommunityIcons name="checkbox-blank-circle-outline" size={24} color="#a1a1a1" />
+          )}
+        </TouchableOpacity>
+        <View style={styles.taskInfo}>
+          <Text style={[styles.taskText, item.completed && styles.completedTask]}>{item.title}</Text>
+          <Text style={styles.dueDateText}>Vence em: {item.dueDate}</Text>
+        </View>
+        <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
+          <MaterialCommunityIcons name="star" size={24} color={item.favorited ? '#FFD700' : '#a1a1a1'} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setEditingTaskId(item.id);
+            setEditingTaskTitle(item.title);
+            setEditingTaskDueDate(item.dueDate);
+          }}
+        >
+          <MaterialCommunityIcons name="pencil-outline" size={24} color="#a1a1a1" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => deleteTask(item.id)}>
+          <MaterialCommunityIcons name="trash-can-outline" size={24} color="#ff5c5c" />
+        </TouchableOpacity>
+      </TouchableOpacity>
     );
   };
-
-  const renderTask = ({ item }: { item: Task }) => (
-    <View style={styles.taskContainer}>
-      <TouchableOpacity onPress={() => toggleTaskCompletion(item.id)} style={styles.checkbox}>
-        {item.completed ? (
-          <MaterialCommunityIcons name="checkbox-marked-circle" size={24} color="#4a90e2" />
-        ) : (
-          <MaterialCommunityIcons name="checkbox-blank-circle-outline" size={24} color="#a1a1a1" />
-        )}
-      </TouchableOpacity>
-      <View style={styles.taskInfo}>
-        <Text style={[styles.taskText, item.completed && styles.completedTask]}>{item.title}</Text>
-        <Text style={styles.dueDateText}>Vence em: {item.dueDate}</Text>
-      </View>
-      <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
-        <MaterialCommunityIcons
-          name="star"
-          size={24}
-          color={item.favorited ? '#FFD700' : '#a1a1a1'}
-        />
-      </TouchableOpacity>
-    </View>
-  );
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Tarefas semanais</Text>
 
@@ -110,17 +174,14 @@ export default function TaskListScreen() {
           placeholderTextColor="#a1a1a1"
           value={newTask}
           onChangeText={setNewTask}
-          returnKeyType="next"
         />
 
         <TextInput
           style={styles.input}
           placeholder="Data de vencimento (dd/mm/aaaa)"
           placeholderTextColor="#a1a1a1"
-          keyboardType="numeric"
           value={newDueDate}
           onChangeText={handleDateChange}
-          returnKeyType="done"
         />
 
         <TouchableOpacity style={styles.addButton} onPress={handleAddTask}>
@@ -128,11 +189,11 @@ export default function TaskListScreen() {
         </TouchableOpacity>
       </View>
 
-      <FlatList
+      <DraggableFlatList
         data={tasks}
         keyExtractor={(item) => item.id}
         renderItem={renderTask}
-        contentContainerStyle={styles.listContainer}
+        onDragEnd={({ data }) => reorderTasks(data)}
       />
     </KeyboardAvoidingView>
   );

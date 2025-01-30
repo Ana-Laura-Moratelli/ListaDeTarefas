@@ -55,6 +55,9 @@ const styles = StyleSheet.create({
       fontSize: 16,
       marginLeft: 12,
     },
+    row: {
+        flexDirection: 'row',
+    },
   });
 
 export default styles;
