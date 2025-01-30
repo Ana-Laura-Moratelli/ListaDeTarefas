@@ -29,7 +29,7 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}> {/* Corrigido */}
+    <GestureHandlerRootView style={{ flex: 1 }}> 
       <TaskProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
