@@ -1,8 +1,9 @@
 import React from 'react';
 import { ThemedText } from '@/components/ThemedText';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { ComponentProps } from 'react';
+import styles from '../../styles/lists';
 
 type MaterialCommunityIconName = ComponentProps<typeof MaterialCommunityIcons>['name'];
 
@@ -54,56 +55,5 @@ const ListScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-    paddingHorizontal: 16,
-    paddingTop: 80,
-  },
-  listContainer: {
-    paddingBottom: 16,
-  },
-  header: {
-    paddingBottom: 20,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  cardContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#1c1c1e',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 10,
-  },
-  leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  title: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  count: {
-    color: '#a1a1a1',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
 
 export default ListScreen;

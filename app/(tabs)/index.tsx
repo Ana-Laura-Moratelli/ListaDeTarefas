@@ -1,9 +1,10 @@
-import { FlatList, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import { FlatList, View, TouchableOpacity, Text } from 'react-native';
 import { HelloWave } from '@/components/HelloWave';
 import { ThemedText } from '@/components/ThemedText';
-import Card from '@/components/card';
+import Card from '@/components/Card/Card';
 import { ComponentProps } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import styles from '../../styles/index';
 
 type MaterialCommunityIconName = ComponentProps<typeof MaterialCommunityIcons>['name'];
 
@@ -59,55 +60,3 @@ export default function HomeScreen() {
      
   );
 }
-
-const styles = StyleSheet.create({
-
-  container: {
-    flex: 1, 
-    backgroundColor: '#00000',
-    paddingHorizontal: 16,
-  },
-
-  header: {
-    paddingTop: 80,
-    paddingVertical: 20,
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 4,
-    alignItems: 'center',
-   
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginBottom: 10,
-  },
-  row: {
-    justifyContent: 'space-around',
-  },
-  listContainer: {
-    paddingBottom: 80,
-   
-  },
-  footer: {
-    paddingTop: 296,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-  },
-  button: {
-    flex: 1,
-    backgroundColor: '#1c73e8',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginHorizontal: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
